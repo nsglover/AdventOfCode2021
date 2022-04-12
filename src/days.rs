@@ -2,9 +2,27 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Lines;
+use std::iter;
 
-fn day1(_input: &Vec<String>) -> Result<(String, String), String> {
-  return Err(String::from("Not implemented."));
+fn day1(input: &Vec<String>) -> Result<(String, String), String> {
+  fn sum_increases(list: &Vec<u32>) -> u32 {
+    let iter_offset = iter::once(&std::u32::MAX).chain(list.iter());
+    let pairs = list.iter().zip(iter_offset);
+    let diffs = pairs.map(|(d, d_prev)| if d > d_prev { 1 } else { 0 });
+    diffs.fold(0, |acc, k| acc + k)
+  }
+
+  let depths: Vec<u32> = input.iter().map(|s| s.parse::<u32>().unwrap()).collect();
+  let shift_0_iter = depths.iter();
+  let mut shift_1_iter = shift_0_iter.clone();
+  let _ = shift_1_iter.next();
+  let mut shift_2_iter = shift_1_iter.clone();
+  let _ = shift_2_iter.next();
+
+  let triples = shift_0_iter.zip(shift_1_iter.zip(shift_2_iter));
+  let three_measurement_windows = triples.map(|(d0, (d1, d2))| d0 + d1 + d2).collect();
+
+  return Ok((sum_increases(&depths).to_string(), sum_increases(&three_measurement_windows).to_string()));
 }
 
 fn day2(_input: &Vec<String>) -> Result<(String, String), String> {
