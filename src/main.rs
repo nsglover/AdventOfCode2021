@@ -38,10 +38,10 @@ fn solve_day(day: u8) {
 
           println!();
         }
-        Err(err) => println!("Day {} encountered an error: {}", day, err),
+        Err(err) => println!("Day {} encountered an error: {}", day, err)
       }
     }
-    None => return,
+    None => return
   }
 }
 
@@ -66,7 +66,7 @@ fn main() {
           println!("Day {} is not a valid day.", day)
         }
       }
-      Err(_) => println!("Invalid input."),
+      Err(_) => println!("Invalid input.")
     }
   }
 }
