@@ -2,6 +2,11 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Lines;
+
+// Imports for parsing and text processing
+use regex::Regex;
+
+// Imports for iteration
 use std::iter;
 
 fn day1(input: &Vec<String>) -> Result<(String, String), String> {
@@ -25,8 +30,43 @@ fn day1(input: &Vec<String>) -> Result<(String, String), String> {
   return Ok((sum_increases(&depths).to_string(), sum_increases(&three_measurement_windows).to_string()));
 }
 
-fn day2(_input: &Vec<String>) -> Result<(String, String), String> {
-  return Err(String::from("Not implemented."));
+fn day2(input: &Vec<String>) -> Result<(String, String), String> {
+  enum Direction {
+    Forward,
+    Down,
+    Up
+  }
+
+  fn parse_cmd(cmd: &String) -> (Direction, i32) {
+    let pattern = Regex::new(r"(?P<dir>\w+)\s(?P<amt>[0-9]+)").unwrap();
+    let captures = pattern.captures(cmd).unwrap();
+    let direction = captures.name("dir").unwrap().as_str();
+    let amount = captures.name("amt").unwrap().as_str();
+
+    let amount = amount.parse::<i32>().unwrap();
+    match direction {
+      "forward" => (Direction::Forward, amount),
+      "down" => (Direction::Down, amount),
+      "up" => (Direction::Up, amount),
+      _ => (Direction::Forward, 0)
+    }
+  }
+
+  let parsed = input.iter().map(|s| parse_cmd(s));
+
+  let (h1, d1) = parsed.clone().fold((0, 0), |(h, d), (dir, amt)| match dir {
+    Direction::Forward => (h + amt, d),
+    Direction::Down => (h, d + amt),
+    Direction::Up => (h, d - amt)
+  });
+
+  let (h2, d2, _) = parsed.fold((0, 0, 0), |(h, d, aim), (dir, amt)| match dir {
+    Direction::Forward => (h + amt, d + aim * amt, aim),
+    Direction::Down => (h, d, aim + amt),
+    Direction::Up => (h, d, aim - amt)
+  });
+
+  return Ok(((h1 * d1).to_string(), (h2 * d2).to_string()));
 }
 
 fn day3(_input: &Vec<String>) -> Result<(String, String), String> {
@@ -149,6 +189,6 @@ pub fn solve_day(day: u8, input: Lines<BufReader<File>>) -> Result<(String, Stri
     23 => day23(lines),
     24 => day24(lines),
     25 => day25(lines),
-    _ => Err(format!("Day {} is not a valid day.", day)),
+    _ => Err(format!("Day {} is not a valid day.", day))
   }
 }
