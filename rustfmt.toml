@@ -1,8 +1,7 @@
 tab_spaces = 2
+
 max_width = 120
-fn_call_width = 120
-struct_lit_width = 120
-struct_variant_width = 120
-single_line_if_else_max_width = 120
-chain_width = 120
+use_small_heuristics = "Max"
+
 trailing_comma = "Never"
+fn_single_line = true
