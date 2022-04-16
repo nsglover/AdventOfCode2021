@@ -136,7 +136,110 @@ fn day3(input: &Vec<String>) -> Result<(String, String), String> {
   return Ok((power_consumption.to_string(), life_support_rating.to_string()));
 }
 
-fn day4(_input: &Vec<String>) -> Result<(String, String), String> { return Err(String::from("Not implemented.")); }
+fn day4(input: &Vec<String>) -> Result<(String, String), String> {
+  struct Board {
+    grid: Vec<Vec<(u8, bool)>>,
+    won: bool
+  }
+
+  fn to_cell(s: &str) -> (u8, bool) { (s.trim().parse::<u8>().unwrap(), false) }
+
+  fn find_index(grid: &Vec<Vec<(u8, bool)>>, value: (u8, bool)) -> Option<(usize, usize)> {
+    for i in 0..5 {
+      for j in 0..5 {
+        if grid[i][j] == value {
+          return Some((i, j));
+        }
+      }
+    }
+
+    return None;
+  }
+
+  fn board_score(grid: &Vec<Vec<(u8, bool)>>) -> u16 {
+    let mut sum = 0;
+
+    for x in 0..5 {
+      for y in 0..5 {
+        if !(&grid[x][y].1) {
+          sum += &(grid[x][y].0 as u16);
+        }
+      }
+    }
+
+    return sum;
+  }
+
+  fn win_with_score(grid: &Vec<Vec<(u8, bool)>>, (i, j): (usize, usize)) -> Option<u16> {
+    let complete_row = {
+      let mut found = true;
+      for x in 0..5 {
+        if !(&grid[x][j].1) {
+          found = false;
+          break;
+        }
+      }
+
+      found
+    };
+
+    let complete_col = {
+      let mut found = true;
+      for y in 0..5 {
+        if !(&grid[i][y].1) {
+          found = false;
+          break;
+        }
+      }
+
+      found
+    };
+
+    if complete_row || complete_col {
+      return Some(board_score(grid));
+    } else {
+      return None;
+    }
+  }
+
+  let numbers = input[0].split(',').map(|s| to_cell(s)).collect::<Vec<_>>();
+
+  let mut boards = (&input[2..])
+    .split(|line| line.trim().is_empty())
+    .map(|grid| {
+      grid
+        .iter()
+        .map(|line| line.trim().replace("  ", " ").split(' ').map(|s| to_cell(s)).collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+    })
+    .map(|g| Board { grid: g, won: false })
+    .collect::<Vec<_>>();
+
+  let mut first_score = None;
+  let mut last_score = 0;
+
+  for n in numbers {
+    for board in boards.iter_mut() {
+      if let Some((i, j)) = find_index(&board.grid, n) {
+        if !board.grid[i][j].1 && !board.won {
+          board.grid[i][j].1 = true;
+
+          if let Some(score) = win_with_score(&board.grid, (i, j)) {
+            board.won = true;
+
+            if let None = first_score {
+              first_score = Some((n.0 as u16) * score)
+            };
+
+            last_score = (n.0 as u16) * score;
+          }
+        }
+      }
+    }
+  }
+
+  return Ok((first_score.unwrap().to_string(), last_score.to_string()));
+}
 
 fn day5(_input: &Vec<String>) -> Result<(String, String), String> { return Err(String::from("Not implemented.")); }
 
